@@ -165,15 +165,24 @@ int main(int argc, char *argv[]) {
 	Content.CoordinateCount = 6;
 	memcpy(Content.Coordindates, TestCoordinates, sizeof(TestCoordinates));
 #endif
+	// PART 1:
+	// Strategy: * Initialize array of tiles with distance INT_MAX and invalid index
+	//           * For each coordinate: check the distance to every tile
+	//             * If distance less than what was already there, update with current index and distance
+	//             * If distance the same as what was already there, update current index to be invalid
+	//           * Count for each index, how many tiles are closest
+	//           * Remove counts for all border areas by checking the border tiles
 	rect Bounds = FindBoundingBox(Content.Coordindates, Content.CoordinateCount);
 	v2 Span = Bounds.UpperRight - Bounds.LowerLeft;
 	int TileCount = Span.X * Span.Y;
 	tile * Tiles = (tile*)malloc(TileCount * sizeof(*Tiles));
 	if (Tiles) {
+		// Init
 		for (int i = 0; i < TileCount; i++) {
 			Tiles[i].Distance = INT_MAX;
 			Tiles[i].Index = UNDEFINED_INDEX;
 		}
+		// Find closest coordinates for each grid point
 		for (int Index = 0; Index < Content.CoordinateCount; Index++) {
 			v2 Coordinate = Content.Coordindates[Index] - Bounds.LowerLeft;
 			for (int Y = 0; Y < Span.Y; Y++) {
@@ -192,12 +201,15 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
+		// Count area sizes
 		int * Bins = (int*)calloc(Content.CoordinateCount + 1, sizeof(*Bins));
 		for (int i = 0; i < Span.X * Span.Y; i++) {
 			tile * Tile = Tiles + i;
 			int Index = (Tile->Index != UNDEFINED_INDEX) ? Tile->Index : Content.CoordinateCount;
 			Bins[Index]++;
 		}
+
+		// Remove border areas
 		for (int X = 0; X < Span.X; X++) {
 			Bins[Tiles[X].Index] = 0;
 		}
@@ -211,12 +223,11 @@ int main(int argc, char *argv[]) {
 			Bins[Tiles[(Y + 1) * Span.X - 1].Index] = 0;
 		}
 
+		// Find maximum area
 		int Max = 0;
 		int Index = UNDEFINED_INDEX;
 		for (int i = 0; i < Content.CoordinateCount; i++) {
 			v2 P = Content.Coordindates[i];
-			if (P.X == Bounds.LowerLeft.X || P.X + 1 == Bounds.UpperRight.X || P.Y == Bounds.LowerLeft.Y || P.Y == Bounds.UpperRight.Y)
-				continue;
 			if (Bins[i] > Max) {
 				Max = Bins[i];
 				Index = i;
@@ -228,6 +239,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stdout, "Time: %.3f ms\n", (1000.0 * (End.QuadPart - Start.QuadPart)) / (double)Freq.QuadPart);
 
 #if 1
+		// Optionally create a text output as well as bitmap, cause it's pretty
 		FILE * outfile = fopen("out.txt", "w");
 		if (outfile) {
 			for (int Y = 0; Y < Span.Y; Y++) {
@@ -240,6 +252,9 @@ int main(int argc, char *argv[]) {
 			}
 			fclose(outfile);
 		}
+
+		// Ehehe
+		srand(0xCAFEFEFE);
 
 		uint32_t * Colors = (uint32_t*)malloc(4 * Content.CoordinateCount);
 		for (int i = 0; i < Content.CoordinateCount; i++) {
