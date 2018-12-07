@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #define UNDEFINED_INDEX 0xFFFFFFFF
+#define DISTANCE_CUTOFF 10000
 
 #define ABS(x) ((x > 0) ? (x) : -(x))
 #define MINIMUM(a, b) ((a < b) ? (a) : (b))
@@ -165,6 +166,7 @@ int main(int argc, char *argv[]) {
 	Content.CoordinateCount = 6;
 	memcpy(Content.Coordindates, TestCoordinates, sizeof(TestCoordinates));
 #endif
+	fprintf(stdout, "PART1:\n");
 	// PART 1:
 	// Strategy: * Initialize array of tiles with distance INT_MAX and invalid index
 	//           * For each coordinate: check the distance to every tile
@@ -268,6 +270,39 @@ int main(int argc, char *argv[]) {
 
 		WriteBitmap(Tiles, Span, Colors, Content.CoordinateCount, "out.bmp");
 		fprintf(stdout, "Pixel: %d, %d\n", Content.Coordindates[Index].X - Bounds.LowerLeft.X, Content.Coordindates[Index].Y - Bounds.LowerLeft.Y);
+#endif
+		fprintf(stdout, "\nPART2:\n");
+		QueryPerformanceCounter(&Start);
+		// PART 2:
+		// Strategy: * For each coordinate: Sum up the distance to all other coordinates
+		// NOTE: Couldn't be arsed to figure out how big the area has to be, so I just
+		//       doubled the span and inspected the bitmap visually to make sure I got
+		//       everything.
+		int Sum = 0;
+		Span = V2(2 * Span.X, 2 * Span.Y);
+		Tiles = (tile*)malloc(Span.X * Span.Y * sizeof(*Tiles));
+		for (int Y = 0; Y < Span.Y; Y++) {
+			for (int X = 0; X < Span.X; X++) {
+				tile * Tile = Tiles + Y * Span.X + X;
+				Tile->Distance = 0;
+				v2 P = V2(X, Y);
+				for (int Index = 0; Index < Content.CoordinateCount; Index++) {
+					Tile->Distance += GetDistance(P, Content.Coordindates[Index]);
+				}
+				Tile->Index = 0;
+				if (Tile->Distance < DISTANCE_CUTOFF) {
+					Tile->Index = UNDEFINED_INDEX;
+					Sum++;
+				}
+			}
+		}
+		QueryPerformanceCounter(&End);
+
+		fprintf(stdout, "Area size: %d\n", Sum);
+		fprintf(stdout, "Time: %.3f ms\n", (1000.0 * (End.QuadPart - Start.QuadPart)) / (double)Freq.QuadPart);
+
+#if 1
+		WriteBitmap(Tiles, Span, Colors, Content.CoordinateCount, "out2.bmp");
 #endif
 	}
 	else {
