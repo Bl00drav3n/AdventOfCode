@@ -142,6 +142,47 @@ for s in text:
 
 #PART 1
 result = ''.join(khan(nodes, edges))
-print(result, len(result))
+print("Original Algorithm                :", result)
 
 #PART 2
+def khan2(nodes, edges, max_workers):
+    t = 0
+    free = max_workers
+    workers = []
+    edges = set(edges)
+    L = []
+    S = nodes - set(edge[1] for edge in edges)
+    while S or not free == max_workers:
+        while free > 0 and S:
+            #start new job
+            free -= 1
+            tmp = sorted(S)
+            n = tmp.pop(0)
+            S = set(tmp)
+            workers.append((n, ord(n) - ord('A') + 61))
+        for i in range(0, len(workers)):
+            #update running job
+            n, rem = workers[i]
+            rem -= 1
+            if rem == 0:
+                #complete job
+                for m in [edge[1] for edge in edges if edge[0] == n]:
+                    edges.remove((n, m))
+                    if not [edge for edge in edges if edge[1] == m]:
+                        S.add(m)
+                free += 1
+                L.append(n)
+            workers[i] = (n, rem)
+        workers = [worker for worker in workers if worker[1] > 0]
+        t += 1
+            
+    if edges:
+        raise RuntimeError("graph has at least one cycle")
+    return L, t
+
+L, t = khan2(nodes, edges, max_workers=1)
+result = ''.join(L)
+print("Parallel algorithm using 1 worker :", result, "-", t, "seconds")
+L, t = khan2(nodes, edges, max_workers=5)
+result = ''.join(L)
+print("Parallel algorithm using 5 workers:", result, "-", t, "seconds")
