@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
-	"strings"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 type node struct {
@@ -103,13 +103,13 @@ func orbitTransfer(r io.Reader) {
 	san := find(tree, "SAN")
 	you := find(tree, "YOU")
 	common := findClosestCommonOrbit(san, you)
-	fmt.Printf("Number of orbital transfers: %d\n", (san.depth - common.depth - 1) + (you.depth - common.depth - 1))
+	fmt.Printf("Number of orbital transfers: %d\n", (san.depth-common.depth-1)+(you.depth-common.depth-1))
 }
 
 func test() {
 	r := strings.NewReader("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L")
 	orbitCountChecksum(r)
-	
+
 	r = strings.NewReader("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN\n")
 	orbitTransfer(r)
 }

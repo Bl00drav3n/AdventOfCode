@@ -14,11 +14,11 @@ type registers struct {
 }
 
 type intComputer struct {
-	reg    registers
-	mem    []int
-	halted bool
-	input  []int
-	output int
+	reg             registers
+	mem             []int
+	halted          bool
+	input           []int
+	output          int
 	outputAvailable bool
 }
 
@@ -33,7 +33,7 @@ func fetch(c *intComputer) int {
 }
 
 var opParamMap = [100]int{
-//  0  1  2  3  4  5  6  7  8  9  
+	//  0  1  2  3  4  5  6  7  8  9
 	0, 3, 3, 1, 1, 2, 2, 3, 3, 0, // 0
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 1
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 2
@@ -104,7 +104,7 @@ func insOutput(c *intComputer) {
 
 func insCondJump(c *intComputer, jumpIfTrue bool) {
 	a := loadParam(c, 0)
-	if (jumpIfTrue && a != 0) || (!jumpIfTrue  && a == 0) {
+	if (jumpIfTrue && a != 0) || (!jumpIfTrue && a == 0) {
 		c.reg.pc = loadParam(c, 1)
 	}
 }
@@ -200,7 +200,7 @@ func createComputer(program string, inputs []int) intComputer {
 func amplify(program string, phase, input int) int {
 	inputs := []int{phase, input}
 	c := createComputer(program, inputs)
-	for ; !c.halted; {
+	for !c.halted {
 		run(&c)
 	}
 	return c.output
@@ -208,20 +208,20 @@ func amplify(program string, phase, input int) int {
 
 // Stolen from https://stackoverflow.com/a/30230552
 func nextPerm(p []int) {
-    for i := len(p) - 1; i >= 0; i-- {
-        if i == 0 || p[i] < len(p)-i-1 {
-            p[i]++
-            return
-        }
-        p[i] = 0
-    }
+	for i := len(p) - 1; i >= 0; i-- {
+		if i == 0 || p[i] < len(p)-i-1 {
+			p[i]++
+			return
+		}
+		p[i] = 0
+	}
 }
 
 func getPerm(orig, p []int) []int {
-    result := append([]int{}, orig...)
-    for i, v := range p {
-        result[i], result[i+v] = result[i+v], result[i]
-    }
+	result := append([]int{}, orig...)
+	for i, v := range p {
+		result[i], result[i+v] = result[i+v], result[i]
+	}
 	return result
 }
 
@@ -253,7 +253,7 @@ func part2() {
 			comps[j] = createComputer(program, []int{phasePerm[j]})
 		}
 		thrust := 0
-		for ; !comps[len(ampPhases) - 1].halted; {
+		for !comps[len(ampPhases)-1].halted {
 			for j := 0; j < len(ampPhases); j++ {
 				comps[j].input = append(comps[j].input, thrust)
 				thrust = run(&comps[j])

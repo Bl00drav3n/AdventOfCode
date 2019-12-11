@@ -34,7 +34,7 @@ func fetch(c *intComputer) int {
 }
 
 var opParamMap = [100]int{
-//  0  1  2  3  4  5  6  7  8  9  
+	//  0  1  2  3  4  5  6  7  8  9
 	0, 3, 3, 1, 1, 2, 2, 3, 3, 0, // 0
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 1
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 2
@@ -105,7 +105,7 @@ func insOutput(c *intComputer) {
 
 func insCondJump(c *intComputer, jumpIfTrue bool) {
 	a := loadParam(c, 0)
-	if (jumpIfTrue && a != 0) || (!jumpIfTrue  && a == 0) {
+	if (jumpIfTrue && a != 0) || (!jumpIfTrue && a == 0) {
 		c.reg.pc = loadParam(c, 1)
 	}
 }

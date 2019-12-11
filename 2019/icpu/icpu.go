@@ -16,9 +16,9 @@ type IntComputer struct {
 		x     int
 		pc    int
 	}
-	mem       []int
-	prog      []int
-	halted    bool
+	mem    []int
+	prog   []int
+	halted bool
 
 	sigInput  chan int
 	sigOutput chan int
@@ -51,7 +51,7 @@ func ReadProgram(filename string) []int {
 func LoadProgram(intCode []int, memsize int) *IntComputer {
 	var c IntComputer
 	c.prog = intCode
-	c.mem = make([]int, memsize + len(intCode))
+	c.mem = make([]int, memsize+len(intCode))
 	c.sigInput = make(chan int, 1)
 	c.sigOutput = make(chan int, 1)
 	copy(c.mem, intCode)
@@ -89,7 +89,7 @@ func fetch(c *IntComputer) int {
 }
 
 var opParamMap = [100]int{
-//0  1  2  3  4  5  6  7  8  9  
+	//0  1  2  3  4  5  6  7  8  9
 	0, 3, 3, 1, 1, 2, 2, 3, 3, 1, // 0
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 1
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 2
@@ -124,17 +124,17 @@ func loadParam(c *IntComputer, n int) int {
 	case 1:
 		return c.reg.r[n]
 	case 2:
-		return load(c, c.reg.x + c.reg.r[n])
+		return load(c, c.reg.x+c.reg.r[n])
 	default:
 		panic("Invalid mode")
 	}
 }
 
 func getAddress(c *IntComputer, n int) int {
-  if c.reg.modes[n] == 2 {
-    return c.reg.x + c.reg.r[n]
-  }
-  return c.reg.r[n]
+	if c.reg.modes[n] == 2 {
+		return c.reg.x + c.reg.r[n]
+	}
+	return c.reg.r[n]
 }
 
 func insAdd(c *IntComputer) {
@@ -161,7 +161,7 @@ func insOutput(c *IntComputer) {
 
 func insCondJump(c *IntComputer, jumpIfTrue bool) {
 	a := loadParam(c, 0)
-	if (jumpIfTrue && a != 0) || (!jumpIfTrue  && a == 0) {
+	if (jumpIfTrue && a != 0) || (!jumpIfTrue && a == 0) {
 		c.reg.pc = loadParam(c, 1)
 	}
 }
@@ -177,7 +177,7 @@ func insCompare(c *IntComputer, cmp func(int, int) bool) {
 }
 
 func insRelBase(c *IntComputer) {
-  c.reg.x += loadParam(c, 0)
+	c.reg.x += loadParam(c, 0)
 }
 
 func insHalt(c *IntComputer) {
@@ -216,8 +216,8 @@ func exec(c *IntComputer, ins instruction) {
 		insCompare(c, func(a, b int) bool { return a < b })
 	case 8:
 		insCompare(c, func(a, b int) bool { return a == b })
-  case 9:
-    insRelBase(c)
+	case 9:
+		insRelBase(c)
 	case 99:
 		insHalt(c)
 	default:

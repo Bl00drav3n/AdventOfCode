@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"AdventOfCode/icpu"
+	"fmt"
 )
 
 func runBOOST(input int) {

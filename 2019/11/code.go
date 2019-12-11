@@ -1,12 +1,12 @@
 package main
 
 import (
-	"os"
+	"AdventOfCode/icpu"
 	"fmt"
 	"image"
 	"image/color"
 	"image/png"
-	"AdventOfCode/icpu"
+	"os"
 )
 
 func min(a, b int) int {
@@ -30,10 +30,10 @@ func genImage(panelColor []int, width, xmin, ymin, xmax, ymax int) *image.RGBA {
 	for y := ymin; y <= ymax; y++ {
 		for x := xmin; x <= xmax; x++ {
 			c := black
-			if panelColor[y * width + x] > 0 {
+			if panelColor[y*width+x] > 0 {
 				c = white
 			}
-			img.Set(x - xmin, y - ymin, c)
+			img.Set(x-xmin, y-ymin, c)
 		}
 	}
 	return img
@@ -46,16 +46,16 @@ func robot(startingColor int) *image.RGBA {
 	directions := [][]int{[]int{0, -1}, []int{1, 0}, []int{0, 1}, []int{-1, 0}}
 	direction := 0
 	width, height := 200, 200
-	x, y := width / 2, height / 2
+	x, y := width/2, height/2
 	xmin, ymin, xmax, ymax := 0x7fffffff, 0x7fffffff, 0, 0
-	panelColor := make([]int, width * height)
-	panelVisits := make([]bool, width * height)
-	panelColor[y * width + x] = startingColor
+	panelColor := make([]int, width*height)
+	panelVisits := make([]bool, width*height)
+	panelColor[y*width+x] = startingColor
 	for !icpu.Halted(iCPU) {
-		idx := y * width + x
+		idx := y*width + x
 		icpu.Send(iCPU, panelColor[idx])
 		color := icpu.Receive(iCPU)
-		turn  := icpu.Receive(iCPU)
+		turn := icpu.Receive(iCPU)
 		switch turn {
 		case 0:
 			direction = direction + len(directions) - 1
