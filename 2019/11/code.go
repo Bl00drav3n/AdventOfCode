@@ -1,7 +1,11 @@
 package main
 
 import (
+	"os"
 	"fmt"
+	"image"
+	"image/color"
+	"image/png"
 	"AdventOfCode/icpu"
 )
 
@@ -19,7 +23,7 @@ func max(a, b int) int {
 	return b
 }
 
-func robot(startingColor int) {
+func robot(startingColor int) *image.RGBA {
 	program := icpu.ReadProgram("input.txt")
 	iCPU := icpu.LoadProgram(program, 1000)
 	go icpu.Run(iCPU)
@@ -60,20 +64,27 @@ func robot(startingColor int) {
 	}
 	fmt.Printf("Total panels visisted: %d\n", totalVisitedPanels)
 	fmt.Printf("Panel area bounds: [(%d,%d), (%d,%d)]\n", xmin, ymin, xmax, ymax)
-	buf := make([]rune, xmax - xmin + 1)
+	img := image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{xmax - xmin + 1, ymax - ymin + 1}})
+	black := color.RGBA{0x00, 0x00, 0x00, 0xff}
+	white := color.RGBA{0xff, 0xff, 0xff, 0xff}
 	for y = ymin; y <= ymax; y++ {
 		for x = xmin; x <= xmax; x++ {
-			c := '.'
+			c := black
 			if panelColor[y * width + x] > 0 {
-				c = '#'
+				c = white
 			}
-			buf[x - xmin] = c
+			img.Set(x - xmin, y - ymin, c)
 		}
-		fmt.Println(string(buf))
 	}
+	return img
+}
+
+func calculate(initialColor int, filename string) {
+	f, _ := os.Create(filename)
+	png.Encode(f, robot(initialColor))
 }
 
 func main() {
-	robot(0)
-	robot(1)
+	calculate(0, "part1.png")
+	calculate(1, "part2.png")
 }
