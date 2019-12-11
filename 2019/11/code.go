@@ -23,6 +23,22 @@ func max(a, b int) int {
 	return b
 }
 
+func genImage(panelColor []int, width, xmin, ymin, xmax, ymax int) *image.RGBA {
+	img := image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{xmax - xmin + 1, ymax - ymin + 1}})
+	black := color.RGBA{0x00, 0x00, 0x00, 0xff}
+	white := color.RGBA{0xff, 0xff, 0xff, 0xff}
+	for y := ymin; y <= ymax; y++ {
+		for x := xmin; x <= xmax; x++ {
+			c := black
+			if panelColor[y * width + x] > 0 {
+				c = white
+			}
+			img.Set(x - xmin, y - ymin, c)
+		}
+	}
+	return img
+}
+
 func robot(startingColor int) *image.RGBA {
 	program := icpu.ReadProgram("input.txt")
 	iCPU := icpu.LoadProgram(program, 1000)
@@ -64,19 +80,7 @@ func robot(startingColor int) *image.RGBA {
 	}
 	fmt.Printf("Total panels visisted: %d\n", totalVisitedPanels)
 	fmt.Printf("Panel area bounds: [(%d,%d), (%d,%d)]\n", xmin, ymin, xmax, ymax)
-	img := image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{xmax - xmin + 1, ymax - ymin + 1}})
-	black := color.RGBA{0x00, 0x00, 0x00, 0xff}
-	white := color.RGBA{0xff, 0xff, 0xff, 0xff}
-	for y = ymin; y <= ymax; y++ {
-		for x = xmin; x <= xmax; x++ {
-			c := black
-			if panelColor[y * width + x] > 0 {
-				c = white
-			}
-			img.Set(x - xmin, y - ymin, c)
-		}
-	}
-	return img
+	return genImage(panelColor, width, xmin, ymin, xmax, ymax)
 }
 
 func calculate(initialColor int, filename string) {
