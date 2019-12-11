@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
-	"strings"
+	"fmt"
 	"io/ioutil"
-	"time"
 	"math"
 	"sort"
+	"strings"
+	"time"
 )
 
 type vec2i struct {
@@ -17,15 +17,15 @@ type vec2i struct {
 
 type Vec2iSlice []vec2i
 
-func (p Vec2iSlice)Len() int {
+func (p Vec2iSlice) Len() int {
 	return len(p)
 }
 
-func (p Vec2iSlice)Less(i, j int) bool {
+func (p Vec2iSlice) Less(i, j int) bool {
 	return math.Hypot(float64(p[i].x), float64(p[i].y)) < math.Hypot(float64(p[j].x), float64(p[j].y))
 }
 
-func (p Vec2iSlice)Swap(i, j int) {
+func (p Vec2iSlice) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
@@ -42,7 +42,7 @@ func gcd(a, b int) int {
 		b = a % b
 		a = t
 	}
- 	return a;
+	return a
 }
 
 func getAsteroidsFromStarmap(m string) []vec2i {
@@ -65,7 +65,7 @@ func countVisibleAsteroids(asteroids []vec2i, fromIdx int) int {
 	xy := make(map[vec2i]bool)
 	for j, other := range asteroids {
 		if fromIdx != j {
-			x, y := asteroid.x - other.x, asteroid.y - other.y
+			x, y := asteroid.x-other.x, asteroid.y-other.y
 			g := abs(gcd(x, y))
 			v := vec2i{x / g, y / g}
 			if !xy[v] {
@@ -91,7 +91,7 @@ func getDirectionalMap(asteroids Vec2iSlice, fromIdx int) map[float64]Vec2iSlice
 	result := make(map[float64]Vec2iSlice)
 	for j, other := range asteroids {
 		if fromIdx != j {
-			x, y := other.x - asteroids[fromIdx].x, other.y - asteroids[fromIdx].y
+			x, y := other.x-asteroids[fromIdx].x, other.y-asteroids[fromIdx].y
 			g := abs(gcd(x, y))
 			v := vec2i{x / g, y / g}
 			phi := math.Atan2(float64(v.y), float64(v.x))
@@ -121,12 +121,12 @@ func findBestAsteroid(starmap string) int {
 
 func runTests() {
 	testMaps := []string{
-`.#..#
+		`.#..#
 .....
 #####
 ....#
 ...##`,
-`......#.#.
+		`......#.#.
 #..#.#....
 ..#######.
 .#.#.###..
@@ -136,7 +136,7 @@ func runTests() {
 .##.#..###
 ##...#..#.
 .#....####`,
-`#.#...#.#.
+		`#.#...#.#.
 .###....#.
 .#....#...
 ##.#.#.#.#
@@ -146,7 +146,7 @@ func runTests() {
 ..##....##
 ......#...
 .####.###.`,
-`.#..#..###
+		`.#..#..###
 ####.###.#
 ....###.#.
 ..###.##.#
@@ -156,7 +156,7 @@ func runTests() {
 #..#.#.###
 .##...##.#
 .....#.#..`,
-`.#..##.###...#######
+		`.#..##.###...#######
 ##.############..##.
 .#.######.########.#
 .###.#######.####.#.
@@ -202,7 +202,7 @@ func part2(starmap string, refIdx int) {
 	var ast vec2i
 	offset := 0
 	for i := 0; i < len(keys); i++ {
-		if keys[i] >= -math.Pi / 2 {
+		if keys[i] >= -math.Pi/2 {
 			offset = i
 			break
 		}
@@ -217,14 +217,17 @@ func part2(starmap string, refIdx int) {
 			i++
 			suffix := "th"
 			switch i % 10 {
-			case 1: suffix = "st"
-			case 2: suffix = "nd"
-			case 3: suffix = "rd"
+			case 1:
+				suffix = "st"
+			case 2:
+				suffix = "nd"
+			case 3:
+				suffix = "rd"
 			}
 			fmt.Printf("The %d%s asteroid to be vaporized is at %d,%d.\n", i, suffix, ast.x, ast.y)
 		}
 	}
-	fmt.Printf("Answer: %d\n", 100 * ast.x + ast.y);
+	fmt.Printf("Answer: %d\n", 100*ast.x+ast.y)
 }
 
 func main() {

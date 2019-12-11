@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"AdventOfCode/icpu"
+	"github.com/Bl00drav3n/AdventOfCode/2019/icpu"
 )
 
 func runBOOST(input int) {

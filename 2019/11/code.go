@@ -1,12 +1,12 @@
 package main
 
 import (
-	"os"
 	"fmt"
+	"github.com/Bl00drav3n/AdventOfCode/2019/icpu"
 	"image"
 	"image/color"
 	"image/png"
-	"AdventOfCode/icpu"
+	"os"
 )
 
 func min(a, b int) int {
@@ -43,19 +43,19 @@ func robot(startingColor int) *image.RGBA {
 	program := icpu.ReadProgram("input.txt")
 	iCPU := icpu.LoadProgram(program, 1000)
 	go icpu.Run(iCPU)
-	directions := [][]int{[]int{0, -1}, []int{1, 0}, []int{0, 1}, []int{-1, 0}}
+	directions := [][]int{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
 	direction := 0
 	width, height := 200, 200
-	x, y := width / 2, height / 2
+	x, y := width/2, height/2
 	xmin, ymin, xmax, ymax := 0x7fffffff, 0x7fffffff, 0, 0
-	panelColor := make([]int, width * height)
-	panelVisits := make([]bool, width * height)
-	panelColor[y * width + x] = startingColor
+	panelColor := make([]int, width*height)
+	panelVisits := make([]bool, width*height)
+	panelColor[y*width+x] = startingColor
 	for !icpu.Halted(iCPU) {
-		idx := y * width + x
+		idx := y*width + x
 		icpu.Send(iCPU, panelColor[idx])
-		color := icpu.Receive(iCPU)
-		turn  := icpu.Receive(iCPU)
+		recvdColor := icpu.Receive(iCPU)
+		turn := icpu.Receive(iCPU)
 		switch turn {
 		case 0:
 			direction = direction + len(directions) - 1
@@ -63,7 +63,7 @@ func robot(startingColor int) *image.RGBA {
 			direction++
 		}
 		direction = direction % len(directions)
-		panelColor[idx] = color
+		panelColor[idx] = recvdColor
 		panelVisits[idx] = true
 		x += directions[direction][0]
 		y += directions[direction][1]

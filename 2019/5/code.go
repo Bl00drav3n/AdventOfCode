@@ -34,7 +34,7 @@ func fetch(c *intComputer) int {
 }
 
 var opParamMap = [100]int{
-//  0  1  2  3  4  5  6  7  8  9  
+	//  0  1  2  3  4  5  6  7  8  9
 	0, 3, 3, 1, 1, 2, 2, 3, 3, 0, // 0
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 1
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 2
@@ -105,7 +105,7 @@ func insOutput(c *intComputer) {
 
 func insCondJump(c *intComputer, jumpIfTrue bool) {
 	a := loadParam(c, 0)
-	if (jumpIfTrue && a != 0) || (!jumpIfTrue  && a == 0) {
+	if (jumpIfTrue && a != 0) || (!jumpIfTrue && a == 0) {
 		c.reg.pc = loadParam(c, 1)
 	}
 }
@@ -204,7 +204,7 @@ func readProgram() []int {
 func runTEST(input int) {
 	fmt.Printf("Running TEST[%d]\n", input)
 	runProgram(readProgram(), []int{input})
-	fmt.Println("Program halted.\n")
+	fmt.Println("Program halted.")
 }
 
 func debug() {
@@ -212,7 +212,7 @@ func debug() {
 		r := strings.NewReader("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99")
 		fmt.Printf("Testing %d:\n", i)
 		runProgram(readIntcode(r, ","), []int{i})
-		fmt.Println("Program halted.\n")
+		fmt.Println("Program halted.")
 	}
 }
 
