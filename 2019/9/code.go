@@ -11,7 +11,7 @@ func runBOOST(input int) {
 	go icpu.Run(iCPU)
 	icpu.Send(iCPU, input)
 	for !icpu.Halted(iCPU) {
-		output := <-icpu.Receive(iCPU)
+		output := icpu.Receive(iCPU)
 		fmt.Printf("Diagonstic code for input %d: %d\n", input, output)
 	}
 }

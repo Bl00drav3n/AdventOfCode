@@ -38,8 +38,8 @@ func robot(startingColor int) *image.RGBA {
 	for !icpu.Halted(iCPU) {
 		idx := y * width + x
 		icpu.Send(iCPU, panelColor[idx])
-		color := <-icpu.Receive(iCPU)
-		turn  := <-icpu.Receive(iCPU)
+		color := icpu.Receive(iCPU)
+		turn  := icpu.Receive(iCPU)
 		switch turn {
 		case 0:
 			direction = direction + len(directions) - 1

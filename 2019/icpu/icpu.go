@@ -62,8 +62,8 @@ func Send(iCPU *IntComputer, value int) {
 	iCPU.sigInput <- value
 }
 
-func Receive(iCPU *IntComputer) <-chan int {
-	return iCPU.sigOutput
+func Receive(iCPU *IntComputer) int {
+	return <-iCPU.sigOutput
 }
 
 func Halted(iCPU *IntComputer) bool {
