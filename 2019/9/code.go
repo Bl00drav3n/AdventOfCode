@@ -10,13 +10,9 @@ func runBOOST(input int) {
 	iCPU := icpu.LoadProgram(program, 1000)
 	go icpu.Run(iCPU)
 	icpu.Send(iCPU, input)
-	for ;; {
-		select {
-		case out := <-icpu.Receive(iCPU):
-			fmt.Println(out)
-		case <-icpu.Halted(iCPU):
-			return
-		}
+	for !icpu.Halted(iCPU) {
+		output := <-icpu.Receive(iCPU)
+		fmt.Printf("Diagonstic code for input %d: %d\n", input, output)
 	}
 }
 

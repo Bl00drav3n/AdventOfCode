@@ -20,7 +20,6 @@ type IntComputer struct {
 	prog      []int
 	halted    bool
 
-	sigHalt   chan bool
 	sigInput  chan int
 	sigOutput chan int
 }
@@ -53,7 +52,6 @@ func LoadProgram(intCode []int, memsize int) *IntComputer {
 	var c IntComputer
 	c.prog = intCode
 	c.mem = make([]int, memsize + len(intCode))
-	c.sigHalt = make(chan bool, 1)
 	c.sigInput = make(chan int, 1)
 	c.sigOutput = make(chan int, 1)
 	copy(c.mem, intCode)
@@ -68,8 +66,8 @@ func Receive(iCPU *IntComputer) <-chan int {
 	return iCPU.sigOutput
 }
 
-func Halted(iCPU *IntComputer) <-chan bool {
-	return iCPU.sigHalt
+func Halted(iCPU *IntComputer) bool {
+	return iCPU.halted
 }
 
 func Run(c *IntComputer) {
@@ -78,7 +76,6 @@ func Run(c *IntComputer) {
 		ins := decode(c, opcode)
 		exec(c, ins)
 	}
-	c.sigHalt <- true
 }
 
 type instruction struct {
