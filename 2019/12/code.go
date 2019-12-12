@@ -1,8 +1,9 @@
 package main
 
-import "fmt"
-
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type vec3i [3]int
 
