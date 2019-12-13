@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+type signal struct {}
+
 type IntComputer struct {
 	reg struct {
 		modes [3]int
@@ -20,8 +22,11 @@ type IntComputer struct {
 	prog   []int
 	halted bool
 
-	sigInput  chan int
-	sigOutput chan int
+	inputBuf   int
+	waitData   chan signal
+	sigHalt    chan signal
+	sigDataReq chan bool
+	sigOutput  chan int
 }
 
 func ReadIntcode(r io.Reader, sep string) []int {
@@ -50,24 +55,30 @@ func ReadProgram(filename string) []int {
 
 func LoadProgram(intCode []int, memsize int) *IntComputer {
 	var c IntComputer
-	c.prog = intCode
-	c.mem = make([]int, memsize+len(intCode))
-	c.sigInput = make(chan int, 1)
-	c.sigOutput = make(chan int, 1)
+	c.prog       = intCode
+	c.mem        = make([]int, memsize+len(intCode))
+	c.sigDataReq = make(chan bool)
+	c.sigOutput  = make(chan int)
+	c.sigHalt    = make(chan signal)
 	copy(c.mem, intCode)
 	return &c
 }
 
+func RequestedInput(c *IntComputer) <-chan bool {
+	return c.sigDataReq
+}
+
 func Send(iCPU *IntComputer, value int) {
-	iCPU.sigInput <- value
+	iCPU.inputBuf = value
+	close(iCPU.waitData)
 }
 
-func Receive(iCPU *IntComputer) int {
-	return <-iCPU.sigOutput
+func Receive(iCPU *IntComputer) <-chan int {
+	return iCPU.sigOutput
 }
 
-func Halted(iCPU *IntComputer) bool {
-	return iCPU.halted
+func Halted(iCPU *IntComputer) <-chan signal {
+	return iCPU.sigHalt
 }
 
 func Run(c *IntComputer) {
@@ -76,6 +87,7 @@ func Run(c *IntComputer) {
 		ins := decode(c, opcode)
 		exec(c, ins)
 	}
+	close(c.sigHalt)
 }
 
 type instruction struct {
@@ -150,7 +162,11 @@ func insMul(c *IntComputer) {
 }
 
 func insInput(c *IntComputer) {
-	value := <-c.sigInput
+	c.waitData = make(chan signal)
+	c.sigDataReq <- true
+	<-c.waitData
+
+	value := c.inputBuf
 	addr := getAddress(c, 0)
 	store(c, addr, value)
 }
@@ -221,7 +237,6 @@ func exec(c *IntComputer, ins instruction) {
 	case 99:
 		insHalt(c)
 	default:
-		fmt.Println(c.mem)
 		panic(fmt.Errorf("Invalid opcode %d", ins.op))
 	}
 }
