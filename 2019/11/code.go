@@ -51,26 +51,33 @@ func robot(startingColor int) *image.RGBA {
 	panelColor := make([]int, width*height)
 	panelVisits := make([]bool, width*height)
 	panelColor[y*width+x] = startingColor
-	for !icpu.Halted(iCPU) {
-		idx := y*width + x
-		icpu.Send(iCPU, panelColor[idx])
-		color := icpu.Receive(iCPU)
-		turn := icpu.Receive(iCPU)
-		switch turn {
-		case 0:
-			direction = direction + len(directions) - 1
-		case 1:
-			direction++
+loop:
+	for {
+		select {
+		case <-icpu.Halted(iCPU):
+			break loop
+		case <-icpu.RequestedInput(iCPU):
+			idx := y*width + x
+			icpu.Send(iCPU, panelColor[idx])
+			color := <-icpu.Receive(iCPU)
+			turn := <-icpu.Receive(iCPU)
+			switch turn {
+			case 0:
+				direction = direction + len(directions) - 1
+			case 1:
+				direction++
+			}
+			direction = direction % len(directions)
+			panelColor[idx] = color
+			panelVisits[idx] = true
+			x += directions[direction][0]
+			y += directions[direction][1]
+			if x < 0 || x >= width || y < 0 || y >= height {
+				panic("Robot moved outside the panel!")
+			}
+			xmin, ymin, xmax, ymax = min(x, xmin), min(y, ymin), max(x, xmax), max(y, ymax)
 		}
-		direction = direction % len(directions)
-		panelColor[idx] = color
-		panelVisits[idx] = true
-		x += directions[direction][0]
-		y += directions[direction][1]
-		if x < 0 || x >= width || y < 0 || y >= height {
-			panic("Robot moved outside the panel!")
-		}
-		xmin, ymin, xmax, ymax = min(x, xmin), min(y, ymin), max(x, xmax), max(y, ymax)
+		
 	}
 	totalVisitedPanels := 0
 	for _, visited := range panelVisits {

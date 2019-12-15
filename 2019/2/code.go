@@ -98,7 +98,7 @@ func part2(program []int) {
 			}
 		}
 	}
-	fmt.Printf("Part2 tests finished, result: %d\n.", finalResult)
+	fmt.Printf("Part2 tests finished, result: %d\n", finalResult)
 }
 
 func main() {
