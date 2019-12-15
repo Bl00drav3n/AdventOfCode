@@ -4,7 +4,6 @@ import (
 	"AdventOfCode/icpu"
 	"fmt"
 	"time"
-	"github.com/golang-collections/collections/stack"
 )
 
 const (
@@ -40,7 +39,6 @@ func move(x, y, dir int) (newX, newY int) {
 
 type State struct {
 	iCPU    *icpu.IntComputer
-	path    *stack.Stack
 	visited [][]bool
 	field   [][]rune
 	width   int
@@ -122,7 +120,6 @@ func NewState(iCPU *icpu.IntComputer, width, height int) (st *State) {
 		height:  height,
 		visited: visited,
 		field:   field,
-		path:    stack.New(),
 		oxyX:    -1,
 		oxyY:    -1}
 	return &s
