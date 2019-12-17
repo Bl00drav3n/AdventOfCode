@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -69,6 +71,17 @@ func betterFFT(digitsIn []int) (digitsOut []int) {
 	return
 }
 
+func weirdFFT(digitsIn []int) (digitsOut []int) {
+	digitsOut = make([]int, len(digitsIn))
+	var s int
+	for i := range digitsOut {
+		idx := len(digitsIn) - i - 1
+		s += digitsIn[idx]
+		digitsOut[idx] = s % 10
+	}
+	return
+}
+
 func part1(input string, phases int) {
 	digits := toDigits(input)
 	start := time.Now()
@@ -80,9 +93,14 @@ func part1(input string, phases int) {
 }
 
 func part2(input string, phases int) {
-	// TODO
-	// NOTE: Some rows reduce to zero if aligned properly
-	// NOTE: Some rows take a simple form of repeats * FFT(original) + rest
+	offset, _ := strconv.Atoi(input[:7])
+	digits := toDigits(strings.Repeat(input, 10000))
+	start := time.Now()
+	for i := 0; i < phases; i++ {
+		digits = weirdFFT(digits)
+	}
+	fmt.Printf("After %3d phases of FFT (len=%d): %v\n", phases, len(digits), digits[offset:offset+8])
+	fmt.Println(time.Since(start))
 }
 
 func main() {
@@ -90,6 +108,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	part1(string(signal), 100)
-	part2(string(signal), 100)
+	str := string(signal)
+	part1(str, 100)
+	part2(str, 100)
 }
