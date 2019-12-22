@@ -99,7 +99,22 @@ func part1() {
 
 func part2() {
 	cmdBuffer := []string{
-		// TODO
+		// ##.#
+		"NOT C J",
+		"AND A J",
+		"AND B J",
+		"AND H J",
+
+		// ...#
+		"NOT A T",
+		"OR T J",
+
+		// #..#
+		"NOT B T",
+		"AND A T",
+		"OR T J",
+
+		"AND D J",
 	}
 	robot(cmdBuffer, true)
 }
