@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"strings"
+	"time"
 )
 
 const (
@@ -294,6 +296,7 @@ func part1(input5x5 string) {
 }
 
 func part2(input5x5 string, count int) {
+	start := time.Now()
 	readBuf := 0
 	level0 := NewLevel()
 	level0.Load(input5x5, readBuf)
@@ -310,16 +313,16 @@ func part2(input5x5 string, count int) {
 	}
 	root, depth := level0.FindRoot(0)
 	root.DrawChildren(readBuf, depth)
-	fmt.Printf("After %d minutes, there are %d bugs present", count, root.CountAllBugs(readBuf))
+	fmt.Printf("After %d minutes, there are %d bugs present\n", count, root.CountAllBugs(readBuf))
+	fmt.Println(time.Since(start))
 }
 
 func main() {
-	input5x5 := `..##.
-..#..
-##...
-#....
-...##`
+	input5x5, err := ioutil.ReadFile("input.txt")
+	if err != nil {
+		panic(err)
+	}
 
-	part1(input5x5)
-	part2(input5x5, 200)
+	part1(string(input5x5))
+	part2(string(input5x5), 200)
 }
