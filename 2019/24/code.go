@@ -92,10 +92,102 @@ func (level *Level) Update(readBuf, writeBuf int) {
 	}
 }
 
-func (root *Level) PrepareUpdate() {
+func (root *Level) PreparePlutonianUpdate() {
 	for p := root; p != nil; p = p.child {
 		p.needsUpdate = true
 	}
+}
+
+func (level *Level) AddChild() *Level {
+	if level.child != nil {
+		panic("Overwriting child!")
+	}
+	child := NewLevel()
+	level.child = child
+	child.parent = level
+	return child
+}
+
+func (level *Level) AddParent() *Level {
+	if level.parent != nil {
+		panic("Overwriting parent!")
+	}
+	parent := NewLevel()
+	level.parent = parent
+	parent.child = level
+	return parent
+}
+
+func (level *Level) CountChildAdjacency(readBuf, dx, dy int) int {
+	var adjacent int
+	if level.child != nil {
+		switch dx {
+		case -1:
+			for k := 0; k < Height; k++ {
+				if level.child.field[readBuf][k][Width-1] {
+					adjacent++
+				}
+			}
+		case 0:
+			switch dy {
+			case -1:
+				for k := 0; k < Width; k++ {
+					if level.child.field[readBuf][Height-1][k] {
+						adjacent++
+					}
+				}
+			case 1:
+				for k := 0; k < Width; k++ {
+					if level.child.field[readBuf][0][k] {
+						adjacent++
+					}
+				}
+			default:
+				panic("Invalid offset!")
+			}
+		case 1:
+			for k := 0; k < Height; k++ {
+				if level.child.field[readBuf][k][0] {
+					adjacent++
+				}
+			}
+		default:
+			panic("Invalid offset!")
+		}
+	}
+	return adjacent
+}
+
+func (level *Level) CountParentAdjacency(readBuf, dx, dy int) int {
+	var adjacent int
+	if level.parent != nil {
+		switch dx {
+		case -1:
+			if level.parent.field[readBuf][2][1] {
+				adjacent++
+			}
+		case 0:
+			switch dy {
+			case -1:
+				if level.parent.field[readBuf][1][2] {
+					adjacent++
+				}
+			case 1:
+				if level.parent.field[readBuf][3][2] {
+					adjacent++
+				}
+			default:
+				panic("Invalid offset!")
+			}
+		case 1:
+			if level.parent.field[readBuf][2][3] {
+				adjacent++
+			}
+		default:
+			panic("Invalid offset!")
+		}
+	}
+	return adjacent
 }
 
 func (level *Level) UpdatePlutonian(readBuf, writeBuf int) {
@@ -110,105 +202,55 @@ func (level *Level) UpdatePlutonian(readBuf, writeBuf int) {
 			for _, offset := range offsets {
 				x, y := i+offset[0], j+offset[1]
 				if x == 2 && y == 2 {
-					if level.child != nil {
-						switch offset[0] {
-						case -1:
-							for k := 0; k < Height; k++ {
-								if level.child.field[readBuf][k][Width-1] {
-									adjacent++
-								}
-							}
-						case 0:
-							switch offset[1] {
-							case -1:
-								for k := 0; k < Width; k++ {
-									if level.child.field[readBuf][Height-1][k] {
-										adjacent++
-									}
-								}
-							case 0:
-								panic("Invalid offset!")
-							case 1:
-								for k := 0; k < Width; k++ {
-									if level.child.field[readBuf][0][k] {
-										adjacent++
-									}
-								}
-							}
-						case 1:
-							for k := 0; k < Height; k++ {
-								if level.child.field[readBuf][k][0] {
-									adjacent++
-								}
-							}
-						}
-					}
+					adjacent += level.CountChildAdjacency(readBuf, offset[0], offset[1])
 				} else if x >= 0 && x < Width && y >= 0 && y < Height {
 					if level.field[readBuf][y][x] {
 						adjacent++
 					}
-				} else if level.parent != nil {
-					switch offset[0] {
-					case -1:
-						if level.parent.field[readBuf][2][1] {
-							adjacent++
-						}
-					case 0:
-						switch offset[1] {
-						case -1:
-							if level.parent.field[readBuf][1][2] {
-								adjacent++
-							}
-						case 0:
-							panic("Invalid offset!")
-						case 1:
-							if level.parent.field[readBuf][3][2] {
-								adjacent++
-							}
-						}
-					case 1:
-						if level.parent.field[readBuf][2][3] {
-							adjacent++
-						}
-					}
+				} else {
+					adjacent += level.CountParentAdjacency(readBuf, offset[0], offset[1])
 				}
 			}
 			level.UpdateCell(readBuf, writeBuf, i, j, adjacent)
 		}
 	}
 
-	if level.parent != nil {
-		if level.parent.needsUpdate {
-			level.parent.UpdatePlutonian(readBuf, writeBuf)
+	bugs := level.CountBugs(writeBuf)
+	tryUpdate := func(p *Level) bool {
+		if p != nil {
+			if p.needsUpdate {
+				p.UpdatePlutonian(readBuf, writeBuf)
+			}
 		}
-	} else {
-		level.parent = NewLevel()
-		level.parent.child = level
+		return p != nil
 	}
+	if exists := tryUpdate(level.parent); !exists && bugs > 0 {
+		level.AddParent()
+	}
+	if exists := tryUpdate(level.child); !exists && bugs > 0 {
+		level.AddChild()
+	}
+}
 
-	if level.child != nil {
-		if level.child.needsUpdate {
-			level.child.UpdatePlutonian(readBuf, writeBuf)
+func (level *Level) CountBugs(buf int) int {
+	var count int
+	for j := range level.field[buf] {
+		for i := range level.field[buf][j] {
+			if i == 2 && j == 2 {
+				continue
+			}
+			if level.field[buf][j][i] {
+				count++
+			}
 		}
-	} else {
-		level.child = NewLevel()
-		level.child.parent = level
 	}
+	return count
 }
 
 func (root *Level) CountAllBugs(buf int) int {
 	var count int
 	for p := root; p != nil; p = p.child {
-		for j := range p.field[buf] {
-			for i := range p.field[buf][j] {
-				if i == 2 && j == 2 {
-					continue
-				}
-				if p.field[buf][j][i] {
-					count++
-				}
-			}
-		}
+		count += p.CountBugs(buf)
 	}
 	return count
 }
@@ -219,6 +261,16 @@ func (level *Level) DrawChildren(buf, depth int) {
 	if level.child != nil {
 		level.child.DrawChildren(buf, depth+1)
 	}
+}
+
+func (level *Level) FindRoot(baseDepth int) (*Level, int) {
+	root := level
+	depth := baseDepth
+	for p := root.parent; p != nil; p = p.parent {
+		root = p
+		depth--
+	}
+	return root, depth
 }
 
 func part1(input5x5 string) {
@@ -241,16 +293,6 @@ func part1(input5x5 string) {
 	}
 }
 
-func (level *Level) FindRoot(baseDepth int) (*Level, int) {
-	root := level
-	depth := baseDepth
-	for p := root.parent; p != nil; p = p.parent {
-		root = p
-		depth--
-	}
-	return root, depth
-}
-
 func part2(input5x5 string, count int) {
 	readBuf := 0
 	level0 := NewLevel()
@@ -262,7 +304,7 @@ func part2(input5x5 string, count int) {
 	for n := 0; n < count; n++ {
 		root, _ := level0.FindRoot(0)
 		writeBuf := 1 - readBuf
-		root.PrepareUpdate()
+		root.PreparePlutonianUpdate()
 		level0.UpdatePlutonian(readBuf, writeBuf)
 		readBuf, writeBuf = writeBuf, readBuf
 	}
