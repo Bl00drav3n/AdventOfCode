@@ -258,7 +258,7 @@ func (root *Level) CountAllBugs(buf int) int {
 }
 
 func (level *Level) DrawChildren(buf, depth int) {
-	fmt.Println("Depth", depth)
+	fmt.Printf("Depth %d:\n", depth)
 	fmt.Println(level.ToString(buf))
 	if level.child != nil {
 		level.child.DrawChildren(buf, depth+1)
@@ -300,13 +300,11 @@ func part2(input5x5 string, count int) {
 	readBuf := 0
 	level0 := NewLevel()
 	level0.Load(input5x5, readBuf)
-	level0.parent = NewLevel()
-	level0.parent.child = level0
-	level0.child = NewLevel()
-	level0.child.parent = level0
+	level0.AddParent()
+	level0.AddChild()
 	for n := 0; n < count; n++ {
-		root, _ := level0.FindRoot(0)
 		writeBuf := 1 - readBuf
+		root, _ := level0.FindRoot(0)
 		root.PreparePlutonianUpdate()
 		level0.UpdatePlutonian(readBuf, writeBuf)
 		readBuf, writeBuf = writeBuf, readBuf
