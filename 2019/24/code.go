@@ -123,73 +123,45 @@ func (level *Level) AddParent() *Level {
 func (level *Level) CountChildAdjacency(readBuf, dx, dy int) int {
 	var adjacent int
 	if level.child != nil {
-		switch dx {
-		case -1:
+		if dx < -1 || dx > 1 || dy < -1 || dy > 1 {
+			panic("Invalid range!")
+		}
+		offsetx := [3]int{Width - 1, 0, 0}
+		if dx == -1 || dx == 1 {
 			for k := 0; k < Height; k++ {
-				if level.child.field[readBuf][k][Width-1] {
+				if level.child.field[readBuf][k][offsetx[dx+1]] {
 					adjacent++
 				}
 			}
-		case 0:
-			switch dy {
-			case -1:
-				for k := 0; k < Width; k++ {
-					if level.child.field[readBuf][Height-1][k] {
-						adjacent++
-					}
-				}
-			case 1:
-				for k := 0; k < Width; k++ {
-					if level.child.field[readBuf][0][k] {
-						adjacent++
-					}
-				}
-			default:
-				panic("Invalid offset!")
-			}
-		case 1:
-			for k := 0; k < Height; k++ {
-				if level.child.field[readBuf][k][0] {
+		} else if dy == -1 || dy == 1 {
+			yoffset := [3]int{Height - 1, 0, 0}
+			for k := 0; k < Width; k++ {
+				if level.child.field[readBuf][yoffset[dy+1]][k] {
 					adjacent++
 				}
 			}
-		default:
-			panic("Invalid offset!")
+		} else {
+			panic("Invalid range!")
 		}
 	}
 	return adjacent
 }
 
 func (level *Level) CountParentAdjacency(readBuf, dx, dy int) int {
-	var adjacent int
 	if level.parent != nil {
-		switch dx {
-		case -1:
-			if level.parent.field[readBuf][2][1] {
-				adjacent++
-			}
-		case 0:
-			switch dy {
-			case -1:
-				if level.parent.field[readBuf][1][2] {
-					adjacent++
-				}
-			case 1:
-				if level.parent.field[readBuf][3][2] {
-					adjacent++
-				}
-			default:
-				panic("Invalid offset!")
-			}
-		case 1:
-			if level.parent.field[readBuf][2][3] {
-				adjacent++
-			}
-		default:
-			panic("Invalid offset!")
+		if dx < -1 || dx > 1 || dy < -1 || dy > 1 {
+			panic("Invalid range!")
+		}
+		choices := [3][3][2]int{
+			{{2, 2}, {2, 1}, {2, 2}},
+			{{1, 2}, {2, 2}, {3, 2}},
+			{{2, 2}, {2, 3}, {2, 2}}}
+		pos := choices[dy+1][dx+1]
+		if level.parent.field[readBuf][pos[1]][pos[0]] {
+			return 1
 		}
 	}
-	return adjacent
+	return 0
 }
 
 func (level *Level) UpdatePlutonian(readBuf, writeBuf int) {
