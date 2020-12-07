@@ -32,7 +32,7 @@ def parse_rhs(child):
 
 def parse_input(input):
     bags = {}
-    for i, input in enumerate(input.splitlines()):
+    for input in input.splitlines():
         lhs, rhs = tuple(input.split(" contain "))
         rhs_children = rhs.split(', ')
         children = [parse_rhs(child) for child in rhs_children]
