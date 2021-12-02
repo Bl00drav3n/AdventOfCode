@@ -26,7 +26,7 @@ commands_part2 = {
 
 def update_pos(ins, pos, part):
     cmd, val = ins.split(' ')
-    commands = commands_part1 if part == 1 else commands_part2
+    commands = commands_part1 if part == PART1 else commands_part2
 
     if cmd in commands:
         return commands[cmd](pos, int(val))
