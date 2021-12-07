@@ -1,11 +1,5 @@
 test_input = '16,1,2,0,4,2,7,1,2,14'
 
-def actual_fuel_cost(n):
-    return n * (n + 1) // 2
-
-def index_of_minimum(values):
-    return min(range(len(values)), key=values.__getitem__)
-
 def get_fuel_costs(input, fn):
     # NOTE(rav3n): Brute force is the easy way
     positions = [int(v) for v in input.split(',')]
@@ -18,7 +12,7 @@ def part1(input):
     print("Part1: The crabs must spend {} fuel to align to the optimal position.".format(min(fuel_costs)))
 
 def part2(input):
-    fuel_costs = get_fuel_costs(input, actual_fuel_cost)
+    fuel_costs = get_fuel_costs(input, lambda x: x * (x + 1) // 2)
     print("Part2: The crabs must spend {} fuel to align to the optimal position.".format(min(fuel_costs)))
 
 print('---TEST---')
