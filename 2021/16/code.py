@@ -60,10 +60,6 @@ def part2(input):
     stream = bitstring.BitStream(hex=input.strip())
     print("Part 2: The BITS expression evaluates to {}".format(read_packet(stream)))
 
-print(vars()['__builtins__']['sum'])
-print(vars()['__builtins__']['map'])
-print(vars()['__builtins__']['filter'])
-
 print('---TEST---')
 part1(test_input)
 part2(test_input)
