@@ -35,7 +35,7 @@ def part1(input):
 
 def part2(input):
     solutions = find_solutions(input)
-    print("Part 2: There are {} distinct initial velocities that cause the probe to be withing the target area at any step".format(len(solutions)))
+    print("Part 2: There are {} distinct initial velocities that cause the probe to be within the target area at any step".format(len(solutions)))
 
 print('---TEST---')
 part1(test_input)
