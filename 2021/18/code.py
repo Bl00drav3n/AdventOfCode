@@ -1,7 +1,6 @@
 import time
 import sys
 import math
-from typing import no_type_check_decorator
 test_input = '''[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[5,[2,8]],4],[5,[[9,9],0]]]
 [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
@@ -16,6 +15,8 @@ test_input = '''[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 def isregular(n):
     return isinstance(n, int)
 
+# NOTE(rav3n): This could have been done in a much saner way, but we were too deep in to turn back
+# This is the result of at least 4 hours of bug hunting, the wording of the text did not help.
 class node:
     def __init__(self, parent):
         self.parent = parent
