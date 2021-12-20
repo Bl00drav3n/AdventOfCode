@@ -22,14 +22,14 @@ def lookup(algo, n):
     return 1 if algo[n] == '#' else 0
 
 def apply(img, algo, it):
-    img_next = [[0 for i in range(len(img[0]) + 6)] for j in range(len(img) + 6)]
+    img_next = [[0 for i in range(len(img[0]) + 2)] for j in range(len(img) + 2)]
     for y in range(0, len(img_next)):
         for x in range(0, len(img_next[y])):
             n = 0
             for iy in [y - 1, y, y + 1]:
                 for ix in [x - 1, x , x + 1]:
                     n <<= 1
-                    n += get_pixel(img, algo, it, ix - 2, iy - 2)
+                    n += get_pixel(img, algo, it, ix - 1, iy - 1)
             img_next[y][x] = lookup(algo, n)
     return img_next
 
