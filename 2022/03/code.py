@@ -1,5 +1,3 @@
-from functools import reduce
-
 test_input = '''vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
