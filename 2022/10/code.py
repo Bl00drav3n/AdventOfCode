@@ -152,6 +152,7 @@ class CPU:
         self.X = 1
         self.ticks = 0
         self.program = iter(program.strip().split('\n'))
+        # in case we gona need more instructions in the future
         self.cycles = {
             'noop': 1,
             'addx': 2
@@ -160,18 +161,14 @@ class CPU:
         self.delay = 0
 
     def clock(self):
+        # update cycle counts
         self.ticks += 1
         if not self.ins:
             self.fetch()
         self.delay = self.delay - 1 if self.delay > 0 else 0
 
-    def run(self):
-        if self.ins:
-            if self.delay == 0:
-                self.addX(self.ins[1])
-                self.ins = None
-
     def fetch(self):
+        # fetch an instruction from the buffer
         line = next(self.program, None)
         if line:
             parts = line.split()
@@ -179,12 +176,17 @@ class CPU:
             self.ins = [parts[0], arg]
             self.delay = self.cycles[parts[0]]
 
+    def run(self):
+        # def execute the buffered instruction and account for delay
+        if self.ins:
+            if self.delay == 0:
+                self.addX(self.ins[1])
+                self.ins = None
+
+    # we default the noop instruction to be equivalent to addX(0)
     def addX(self, V):
         self.X += V
 
-def draw_crt(crt):
-    [print(''.join(line)) for line in crt]
-    
 def part1(input):
     cpu = CPU(input)
     total = 0
@@ -197,7 +199,7 @@ def part1(input):
 
 def part2(input):
     cpu = CPU(input)
-    crt = [['.' for _ in range(40)] for _ in range(6)]
+    # no pesky nested for loops in this hood
     for idx in range(40 * 6):
         x = idx % 40
         cpu.clock()
