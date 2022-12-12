@@ -42,6 +42,9 @@ def worry_less(worry):
 
 def worry_even_less(worry):
     # At some point we will figure out why this is true, I promise
+    # Update: This actually makes sense, because whatever the result of 
+    # worry % a is, as long as magic_monkey_number is a multiple of a,
+    # worry % a == (worry % magic_monkey_number) % a.
     return worry % magic_monkey_number
 
 def operation_add(x, y):
