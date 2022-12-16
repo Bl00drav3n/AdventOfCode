@@ -65,6 +65,30 @@ def covers(intervals, left, right):
     else:
         return left >= intervals[0][0] or right <= intervals[0][1]
 
+def get_limits(sensors, max_dim):
+    # NOTE: The solution is still quite dumb, but we try to limit the search space by restricting
+    # the search to the range of those sensors that are exactly one uncovered space apart.
+    candidates = {}
+    for sensor, dist in sensors.items():
+        for other, other_dist in sensors.items():
+            if sensor != other:
+                if distance(sensor, other) == dist + other_dist + 2:
+                    if not sensor in candidates:
+                        candidates[sensor] = []
+                    candidates[sensor].append(other)
+
+    lower_lim = [max_dim, max_dim]
+    upper_lim = [0, 0]
+    for sensor in candidates.keys():
+        d = sensors[sensor]
+        lower_lim[0] = min(lower_lim[0], sensor[0] - d)
+        lower_lim[1] = min(lower_lim[1], sensor[1] - d)
+        upper_lim[0] = max(upper_lim[0], sensor[0] + d)
+        upper_lim[1] = max(upper_lim[1], sensor[1] + d)
+    lower_lim = [max(lower_lim[0], 0), max(lower_lim[1], 0)]
+    upper_lim = [min(upper_lim[0], max_dim), min(upper_lim[1], max_dim)]
+    return lower_lim, upper_lim
+
 def part1(input, test_y):
     if input:
         sensors = read_input(input)
@@ -78,10 +102,10 @@ def part2(input, max_dim):
         start = time.perf_counter_ns()
         sensors = read_input(input)
         p = [0, 0]
+        # Brute force search, fast enough
         for axis in [0, 1]:
-            # NOTE: People that are not lazy would determine the bounding boxes for each sensor and restrict the search area
-            # Luckily I am lazy and will just slack. :)
-            for i in range(max_dim + 1):
+            lower_lim, upper_lim = get_limits(sensors, max_dim)
+            for i in range(lower_lim[axis], upper_lim[axis] + 1):
                 interval = find_intervals_on_axis(sensors, axis, i)
                 if not covers(interval, 0, max_dim):
                     p[axis] = i
