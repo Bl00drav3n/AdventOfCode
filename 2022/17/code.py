@@ -17,13 +17,7 @@ def create_shape(pos, idx):
     return result
 
 def occupied(rocks, p):
-    for rock in reversed(rocks):
-        for other_p in rock:
-            if p[0] == other_p[0] and p[1] == other_p[1]:
-                return True
-        #if p in rocks:
-            #return True
-    return False
+    return p in rocks
 
 def move_shape(rocks, shape, move):
     new_shape = []
@@ -35,16 +29,18 @@ def move_shape(rocks, shape, move):
     return new_shape, True
 
 def update_rocks(rocks, rock):
-    rocks.append(rock)
+    for p in rock:
+        rocks.add(p)
 
 def simulate(input, max_rocks):
     # This was actually straightforward first, then I changed it in hopes
     # to make it faster, which turned out to be true for the test output,
     # but is still slow for the actual input. It can probably be sped up
     # by reducing the amount of overlap-tests to perform. My lazy method
-    # just dumps in all shapes into a big list and I search it for every
-    # collision test for every sub-shape, which obviously is abyssmally
-    # slow. But I can't be bothered. :^)
+    # just dumps in all shapes into a hashtable and I search it for every
+    # collision test for every sub-shape. The old version used a very slow
+    # list to track all the sub shapes, which was abyssmally slow, but changing
+    # it was quite easy, so here we go. :)
     # Could also not run p2 twice, but I thought the cycle would occur
     # earlier like in the test case, so I didn't change it accordingly.
     # Turns out it takes more than 2022 rocks for a cycle to occur in my
@@ -52,11 +48,14 @@ def simulate(input, max_rocks):
     # first 2022 rocks.
     height = 0
     if input:
-        rocks = 0
         last_height = 0
         readp = 0
         instructions = input.strip()
-        rocks = []
+        # UPDATE: I used a list before, but after updating, I realized
+        # that a set would work equally as well and would be super fast
+        # without any drawbacks. Now we are lightning fast :)
+        # rocks = []
+        rocks = set()
         heights = [0 for _ in range(7)]
         diffs = set()
         recording = []
