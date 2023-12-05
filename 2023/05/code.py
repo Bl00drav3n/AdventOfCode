@@ -73,7 +73,7 @@ def match_range(mapping, rstart, rend, result, ranges):
         elif rstart <= mstart and rend >= mend:
             # overcovered [..mmm...]
             # split into a nonmapped range and a right overlap
-            result.append([rstart, mstart - rstart])
+            ranges.append([rstart, mstart - rstart])
             ranges.append([mstart, rend - mstart + 1])
             return True
     return False
