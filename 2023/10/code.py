@@ -61,7 +61,7 @@ pipe_map = {
 
 def part1(input):
     chart = parse(input)
-    chart = {item for item in chart.items() if item[1] != '.'}
+    chart = {k:v for k, v in chart.items() if v != '.'}
     start_pos = [k for (k, v) in chart.items() if v == 'S'][0]
     # Find possible ways to go from the starting position
     neighbor_offsets = [Vector(-1, 0), Vector(1, 0), Vector(0, -1), Vector(0, 1)]
