@@ -1,2 +1,5 @@
 
 launch.json
+
+.zig-cache
+zig-out
