@@ -11,29 +11,28 @@ const test_input =
 
 const Report = struct {
     data: []i32,
-    valid: bool,
 
-    fn check(self: *Report) bool {
-        self.valid = true;
+    fn check(self: Report) bool {
+        var valid = true;
 
         var delta: i32 = self.data[1] - self.data[0];
         if (delta == 0) {
-            self.valid = false;
+            valid = false;
         } else {
             const inc: bool = delta > 0;
             for (1..self.data.len) |i| {
                 delta = self.data[i] - self.data[i - 1];
                 if (delta == 0 or delta < 0 and inc or delta > 0 and !inc) {
-                    self.valid = false;
+                    valid = false;
                     break;
                 } else if (inc and delta > 3 or !inc and delta < -3) {
-                    self.valid = false;
+                    valid = false;
                     break;
                 }
             }
         }
 
-        return self.valid;
+        return valid;
     }
 };
 
@@ -51,7 +50,7 @@ fn read_report(allocator: std.mem.Allocator, line: []const u8) !Report {
         data[i] = try std.fmt.parseInt(i32, it.next().?, 10);
     }
 
-    return .{ .data = data, .valid = false };
+    return .{ .data = data };
 }
 
 fn read_input(allocator: std.mem.Allocator, input_data: []const u8, reports: *std.ArrayList(Report)) !void {
@@ -70,7 +69,7 @@ fn part1(allocator: std.mem.Allocator, input_data: []const u8) !void {
 
     var valid_reports: u32 = 0;
     for (reports.items) |item| {
-        if (item.valid) {
+        if (item.check()) {
             valid_reports += 1;
         }
     }
@@ -88,14 +87,14 @@ fn part2(allocator: std.mem.Allocator, input_data: []const u8) !void {
 
     var valid_reports: u32 = 0;
     for (reports.items) |report| {
-        if (report.valid) {
+        if (report.check()) {
             valid_reports += 1;
         } else {
             for (0..report.data.len) |i| {
                 var arena_allocator = std.heap.ArenaAllocator.init(buf_alloc);
                 defer arena_allocator.deinit();
 
-                var new_report = Report{ .data = try arena_allocator.allocator().alloc(i32, report.data.len - 1), .valid = false };
+                var new_report = Report{ .data = try arena_allocator.allocator().alloc(i32, report.data.len - 1) };
                 for (0..i) |k| {
                     new_report.data[k] = report.data[k];
                 }
