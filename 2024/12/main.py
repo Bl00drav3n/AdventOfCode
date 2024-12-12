@@ -115,12 +115,7 @@ class Gardens:
                     fence_segments += len(runs_top) + len(runs_bottom)
                 for x in range(bounding_box[0][0], bounding_box[1][0]):
                     runs_left = int_seq_to_ranges([y for y in range(bounding_box[0][1], bounding_box[1][1]) if (x, y) in region and not (x - 1, y) in region])
-                    test = []
-                    for y in range(bounding_box[0][1], bounding_box[1][1]):
-                        if (x, y) in region:
-                            if not (x + 1, y) in region:
-                                test.append(y)
-                    runs_right = int_seq_to_ranges(test)
+                    runs_right = int_seq_to_ranges([y for y in range(bounding_box[0][1], bounding_box[1][1]) if (x, y) in region and not (x + 1, y) in region])
                     fence_segments += len(runs_left) + len(runs_right)
                 prices += fence_segments * area
             region_prices[plant] = prices
