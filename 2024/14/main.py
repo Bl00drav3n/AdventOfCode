@@ -61,10 +61,10 @@ def part2(input, width, height):
     with open('out.txt', 'w') as file:
         max_iterations = 10000
         robots = read_input(input)
-        corr = 10e300
+        corr = correlation(robots)
         for i in range(max_iterations):
-            if i % 100 == 0:
-                print("ITERATION {}".format(i + 1))
+            if (i + 1) % 100 == 0:
+               print("ITERATION {}".format(i + 1))
             update(robots, width, height)
             test_corr = correlation(robots)
             if test_corr < corr:
@@ -74,7 +74,7 @@ def part2(input, width, height):
                 for y in range(height): buffer[y] = ['.'] * width
                 for robot in robots:
                     buffer[robot[0][1]][robot[0][0]] = '#'
-                file.write('ITERATION {}:\n'.format(i))
+                file.write('ITERATION {}:\n'.format(i + 1))
                 for line in buffer:
                     file.write(''.join(line) + '\n')
                 file.write('\n')
