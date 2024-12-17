@@ -1,19 +1,21 @@
 test_input = '''
-###############
-#.......#....E#
-#.#.###.#.###.#
-#.....#.#...#.#
-#.###.#####.#.#
-#.#.#.......#.#
-#.#.#####.###.#
-#...........#.#
-###.#.#####.#.#
-#...#.....#.#.#
-#.#.#.###.#.#.#
-#.....#...#.#.#
-#.###.#.#.#.#.#
-#S..#.....#...#
-###############
+#################
+#...#...#...#..E#
+#.#.#.#.#.#.#.#.#
+#.#.#.#...#...#.#
+#.#.#.#.###.#.#.#
+#...#.#.#.....#.#
+#.#.#.#.#.#####.#
+#.#...#.#.#.....#
+#.#.#####.#.###.#
+#.#.#.......#...#
+#.#.###.#####.###
+#.#.#...#.....#.#
+#.#.#.#####.###.#
+#.#.#.........#.#
+#.#.#.#########.#
+#S#.............#
+#################
 '''
 
 START = 'S'
@@ -45,8 +47,7 @@ class Node:
         self.neighbors = [None, None, None, None]
 
     def __repr__(self):
-        return "{}".format(self.p)
-    
+        return "{}".format(self.p)   
     
     def add_neighbor(self, dir, node):
         assert dir >= 0 and dir < len(self.neighbors), "Invalid direction!"
@@ -55,6 +56,8 @@ class Node:
 class Maze:
     def __init__(self):
         self.node_table = {}
+        self.directions = {}
+        self.scores = {}
         self.start = None
         self.end = None
 
@@ -78,55 +81,58 @@ class Maze:
                     node.add_neighbor(dir, self.node_table[n])
         return self
     
-    def find_lowest_score_paths(self):
-        # TODO (never?): Figure out if we should go forward with this bad algorithm or rewrite it with using
-        # line segments for clarity (and speed/memory footprint?).
-        # The algorithm visits all connected nodes and records the best score inside the visited map.
-        # Runtime is attrocious.
-        states = [(self.start, Direction(EAST), 0)]
-        visited = {}
-        paths = {}
-        path = []
+    def calculate_lowest_scores(self):
+        # Bruteforce BFS cause why be smart? Sorry it's slow. We find the best 'distance' to every reachable node on the map.
+        # We also record the directions we came from for every node for use in part 2.
+        states = [(self.start, Direction(EAST), 0), (self.start, Direction(NORTH), 1000), (self.start, Direction(SOUTH), 1000)]
+        self.scores = {node: 1e300 for node in self.node_table.values()}
         while states:
             node, dir, score = states.pop()
-            path.append(node)
-            if not node in visited or score <= visited[node]:
-                visited[node] = score
-                if node != self.end:
-                    if node.neighbors:
-                        directions = [dir, dir.turn_clockwise(), dir.turn_anticlockwise()]
-                        score_increases = [0, 1000, 1000]
-                        for i in (0, 1, 2):
-                            new_dir = directions[i]
-                            if node.neighbors[new_dir.state]:
-                                states.append((node.neighbors[new_dir.state], new_dir, score + score_increases[i] + 1))
-                else:
-                    if not visited[self.end] in paths:
-                        paths[visited[self.end]] = []
-                    paths[visited[self.end]].append(set(path))
-
-        best_paths = paths[visited[self.end]]
-        return visited[self.end], best_paths
+            if score < self.scores[node] and score <= self.scores[self.end]:
+                self.scores[node] = score
+                self.directions[node] = dir
+                if node.neighbors and node != self.end:
+                    directions = [dir, dir.turn_clockwise(), dir.turn_anticlockwise()]
+                    score_increases = [0, 1000, 1000]
+                    for i in (0, 1, 2):
+                        new_dir = directions[i]
+                        if node.neighbors[new_dir.state]:
+                            states.append((node.neighbors[new_dir.state], new_dir, score + score_increases[i] + 1))
+        return self.scores[self.end]
     
-def print_paths(input, best_paths):
+    def find_best_nodes(self):
+        # DFS from the end to start to find all visited nodes
+        visited = set()
+        nodes = [(self.end, self.end)]
+        while nodes:
+            node, prev_node = nodes.pop()
+            visited.add(node)
+            if node != self.start:
+                neighbors = [n for n in node.neighbors if n and not n in visited]
+                for neighbor in neighbors:
+                    if self.scores[neighbor] < self.scores[node] or self.directions[neighbor] == self.directions[prev_node]:
+                        nodes.append((neighbor, node))
+        return visited
+
+def print_paths(input, best_nodes):
     for y, line in enumerate(input.strip().split('\n')):
         row = [None] * len(line)
         for x, c, in enumerate(line):
             row[x] = c
             if c in (START, END, PATH):
-                for path in best_paths:
-                    if (x, y) in path:
-                        row[x] = 'O'
+                if (x, y) in best_nodes:
+                    row[x] = 'O'
         print("".join(row))
 
 def part1(input):
     maze = Maze().read(input)
-    min_score, best_paths = maze.find_lowest_score_paths()
+    min_score = maze.calculate_lowest_scores()
     print("Part 1: The lowest score a Reindeer could possibly get is {}." .format(min_score))
-    part2(best_paths)
+    part2(input, maze)
 
-def part2(best_paths):
-    print("Part 2 (FIXME!): {} tiles are part of at least one of the best paths.".format(len(set.union(*best_paths))))
+def part2(input, maze):
+    nodes = maze.find_best_nodes()
+    print("Part 2: {} tiles are part of at least one of the best paths.".format(len(nodes)))
 
 print('---TEST---')
 part1(test_input)
