@@ -41,24 +41,37 @@ def check_possiblities(design, patterns):
     # Powered by https://github.com/Fractura/advent-of-code/blob/main/2024/19/Program.cs
     combinations = [0] * (len(design) + 1)
     combinations[0] = 1
+    # We cache the length here to speed up the loop (runs 50% faster than previous version)
+    patterns = [(p, len(p)) for p in patterns]
     for i in range(len(design)):
-        for pattern in filter(lambda p: p == design[i:i+len(p)], patterns):
-            combinations[i + len(pattern)] += combinations[i]
+        for pattern, length in patterns:
+            if design[i:i+length] == pattern:
+                combinations[i + length] += combinations[i]
     return combinations[-1]
-                
+
+def timediff(start_ns, end_ns):
+    return (end_ns - start_ns)/1e9
+
+import time                
 def part1(input):
     patterns, designs = input.strip().split('\n\n')
     patterns = patterns.split(', ')
     designs = designs.split('\n')
+    start = time.time_ns()
     count = sum([1 for design in designs if check(design, patterns)])
+    end = time.time_ns()
     print("Part 1: The number of possible designs is {}." .format(count))
+    print("TIME: {:.3f} sec".format(timediff(start, end)))
 
 def part2(input):
     patterns, designs = input.strip().split('\n\n')
     patterns = patterns.split(', ')
     designs = designs.split('\n')
+    start = time.time_ns()
     total = sum([check_possiblities(design, patterns) for design in designs])
+    end = time.time_ns()
     print("Part 2: The sum of the number of different ways you could make each design is {}.".format(total))
+    print("TIME: {:.3f} sec".format(timediff(start, end)))
 
 print('---TEST---')
 part1(test_input)
