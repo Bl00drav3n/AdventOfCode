@@ -30,40 +30,6 @@ def check(design, patterns):
                 break
     return table[len(design)]
 
-def substrings(pattern):
-    items = []
-    for length in range(1, len(pattern)):
-        for j in range(length + 1):
-            items.append(pattern[j:j+length])
-    return items
-
-def substring_map(patterns):
-    tree = {}
-    stack = [pattern for pattern in patterns]
-    while stack:
-        pattern = stack.pop()
-        if not pattern in tree:
-            tree[pattern] = substrings(pattern)
-            for item in tree[pattern]:
-                stack.append(item)
-
-def submap(patterns):
-    smap = {}
-    patterns = sorted(patterns, key=len, reverse=True)
-    for i, pattern in enumerate(patterns):
-        sub_patterns = patterns[i+1:]
-        table = [False] * (len(pattern) + 1)
-        table[0] = True
-        matches = [None] * (len(pattern) + 1)
-        for i in range(len(matches)):
-            matches[i] = []
-        for j in range(1, len(pattern) + 1):
-            for i in range(j):
-                if table[i] and pattern[i:j] in sub_patterns:
-                    table[j] = True
-                    matches[j].append(pattern[i:j])
-        print(matches)
-
 def check_possiblities(design, patterns):
     # For every position of the input we record how many times we can
     # reach any other position by matching subsequences at the current position.
