@@ -101,10 +101,8 @@ def part2(input):
         test_length += 1
         print("Testing networks of length {}...".format(test_length))
         new_networks = set()
-        computers = set(computers_by_name.values())
-        while computers:
-            computer = computers.pop()
-            for network in filter(lambda n: not computer.name in n, networks):
+        for network in networks:
+            for computer in filter(lambda c: not c.name in network, computers_by_name.values()):
                 if check(computers_by_name, network, computer):
                     network = tuple(sorted(list(network) + [computer.name]))
                     new_networks.add(network)
