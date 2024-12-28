@@ -49,7 +49,6 @@ tnw OR pbm -> gnj
 '''
 
 import time
-import graphviz
 
 class Gate:
     def __init__(self, a=None, b=None, op=None):
@@ -62,6 +61,7 @@ class Gate:
         return "{} {} {}".format(self.a, self.op, self.b)
 
     def tick(self, gates):
+        # Recursion, no intermediate values get stored
         a = gates[self.a].value
         if a == None:
             a = gates[self.a].tick(gates)
@@ -73,16 +73,6 @@ class Gate:
             case 'OR': return a | b
             case 'XOR': return a ^ b
             case _: assert False, 'Invalid operator!'
-
-    def dependencies(self, gates, d):
-        if gates[self.a].value == None:
-            gates[self.a].dependencies(gates, d)
-        else:
-            d.add(self.a)
-        if gates[self.b].value == None:
-            gates[self.b].dependencies(gates, d)
-        else:
-            d.add(self.b)
 
 def read_input(input):
     state_strings, gate_strings = input.strip().split('\n\n')
@@ -117,50 +107,44 @@ def part2(input):
     start = time.time_ns()
     gates = read_input(input)
 
-    input_wires_x = sorted([wire for wire in gates.keys() if wire[0] == 'x'])
-    input_wires_y = sorted([wire for wire in gates.keys() if wire[0] == 'y'])
-    output_wires = sorted([wire for wire in gates.keys() if wire[0] == 'z'])
-
-    for wire in input_wires_x:
-        gates[wire].value = 0
-    for wire in input_wires_y:
-        gates[wire].value = 0
-    
-    dependencies = {}
-    for wire in output_wires:
-        s = set()
-        gates[wire].dependencies(gates, s)
-        dependencies[wire] = sorted(s)
-
-    # TODO: The logic is flawed, we are looking at the wrong nodes!
+    # We go through every gate and check if the outputs are correct.
+    # If the gate is an output gate, it has to be an XOR gate, except for z45
+    # which is the carry out OR-gate
+    # An XOR gate has to either be an outuput gate (with x, y inputs - test is skipped), or have an XOR and and OR gate as inputs.
+    # An OR gate has to have two AND gates as inputs.
+    # An AND gate has to have an XOR and an OR gate as input, except for the calculation for the carry out of bit1,
+    # which takes the output of x00 AND y00 as input. 
     broken_outputs = set()
     for gate in gates:
         g = gates[gate]
         if gate[0] == 'z':
-            if g.op != 'XOR':
+            if gate == 'z45' and g.op != 'OR' or gate != 'z45' and g.op != 'XOR': 
                 broken_outputs.add(gate)
-        if g.a and g.b:
+        elif g.a and g.b:
             a = gates[g.a]
             b = gates[g.b]
-            if a.op and b.op:
-                match g.op:
-                    case 'XOR':
-                        if not (a.op == 'XOR' and b.op == 'OR' or a.op == 'OR' and b.op == 'XOR'):
-                            if not (gate == 'z01' and a.op == 'XOR' and b.op == 'AND' or a.op == 'OR' and b.op == 'XOR'):
-                                broken_outputs.add(gate)
-                                print("{} - {}: {}, {}".format(gate, g, a, b))
-                    case 'AND':
-                        if not (a.op == 'XOR' and b.op == 'OR' or a.op == 'OR' and b.op == 'XOR'):
-                            broken_outputs.add(gate)
-                            print("{} - {}: {}, {}".format(gate, g, a, b))
-                    case 'OR':
-                        if not (a.op == 'AND' and b.op == 'AND'):
-                            broken_outputs.add(gate)
-                            print("{} - {}: {}, {}".format(gate, g, a, b))
+            match g.op:
+                case 'XOR':
+                    if a.op == 'XOR' and b.op != 'OR':
+                        broken_outputs.add(g.b)
+                    elif a.op != 'XOR' and b.op == 'OR':
+                        broken_outputs.add(g.a)
+                case 'AND':
+                    if a.op == 'XOR' and b.op != 'OR':
+                        if not (b.op == 'AND' and b.a in ('x00', 'y00') and b.b in ('x00', 'y00')):
+                            broken_outputs.add(g.b)
+                    elif a.op != 'XOR' and b.op == 'OR':
+                        if not (a.op == 'AND' and a.a in ('x00', 'y00') and a.b in ('x00', 'y00')):
+                            broken_outputs.add(g.a)
+                case 'OR':
+                    if a.op == 'AND' and b.op != 'AND':
+                        broken_outputs.add(g.b)
+                    elif a.op != 'AND' and b.op == 'AND':
+                        broken_outputs.add(g.a)
     result = sorted(broken_outputs)
     assert len(result) == 8, "Invalid number of wires!"
     end = time.time_ns()
-    print("Part 2: The answer is {}." .format(','.join(result)))
+    print("Part 2: The swapped output wires are, in alphanumeric order {}." .format(','.join(result)))
     print_time_diff(start, end)
 
 print('---TEST---')
